@@ -1,0 +1,48 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # Global CORS configuration for UI
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        # Traffic Service
+        - id: traffic-service
+          uri: lb://TRAFFIC-SERVICE
+          predicates:
+            - Path=/api/traffic/**, /dashboard/**
+
+        # Environment Service
+        - id: environment-service
+          uri: lb://ENVIRONMENT-SERVICE
+          predicates:
+            - Path=/api/environment/**, /ws-env/**
+
+        # AI Engine Service
+        - id: ai-service
+          uri: lb://AI-SERVICE
+          predicates:
+            - Path=/api/ai/**
+
+        - id: alert-service
+          uri: lb://ALERT-SERVICE
+          predicates:
+            - Path=/api/alerts/**
+
+
+ribbon:
+  ReadTimeout: 10000
+  ConnectTimeout: 10000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

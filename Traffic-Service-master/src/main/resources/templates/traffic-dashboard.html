@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart City AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0b0e14; color: #e2e8f0; font-family: sans-serif; }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        @keyframes glow {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.3); }
+            50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        }
+        .heavy-alert { animation: glow 2s infinite; border-width: 2px; }
+
+        /* Emergency Alert Animation */
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; transform: scale(0.98); }
+            100% { opacity: 1; }
+        }
+        .emergency-item { animation: blink 1.5s infinite; }
+
+        .ai-high { color: #f87171; text-shadow: 0 0 5px rgba(248, 113, 113, 0.5); }
+        .ai-medium { color: #fbbf24; }
+        .ai-low { color: #34d399; }
+    </style>
+</head>
+<body class="p-6">
+
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-blue-400">🏙️ CITY AI CONTROL CENTER</h1>
+            <p class="text-xs text-gray-500 font-mono mt-1">Status: <span class="text-green-500 text-bold">CONNECTED</span> | Gateway: 8081</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg transition">Refresh All Services</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <div class="lg:col-span-1 glass-card p-4 rounded-2xl">
+            <h3 class="text-lg font-bold mb-4 text-blue-300">Traffic Density</h3>
+            <canvas id="trafficChart"></canvas>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            <h3 class="text-xl font-bold text-blue-400 flex items-center gap-2">🚦 Live Traffic Feed</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div th:each="t : ${allTrafficData}"
+                     th:classappend="${t.vehicleCount > 100} ? 'heavy-alert' : 'border-blue-500/20'"
+                     class="glass-card p-5 rounded-xl border-l-4">
+                    <div class="flex justify-between">
+                        <h2 class="text-xl font-bold text-white" th:text="${t.areaName}">Area</h2>
+                        <span class="text-2xl font-black text-blue-400" th:text="${t.vehicleCount}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl border border-blue-500/30">
+                <h3 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2">🧠 AI Smart Predictions</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-blue-300 border-b border-gray-700">
+                        <tr>
+                            <th class="pb-2">Area</th>
+                            <th class="pb-2">Level</th>
+                            <th class="pb-2">Health Advice</th>
+                        </tr>
+                        </thead>
+                        <tbody id="aiTableBody">
+                        <tr><td colspan="3" class="py-4 text-gray-500 text-center italic text-xs">Waiting for AI insights...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1 space-y-6">
+            <div>
+                <h3 class="text-xl font-bold text-emerald-400 mb-4">🌱 Environment</h3>
+                <div th:each="env : ${allEnvData}" class="glass-card p-4 rounded-xl border-l-4 border-emerald-500 mb-3">
+                    <h4 class="font-bold text-white text-sm" th:text="${env.location}">Location</h4>
+                    <p class="text-2xl font-bold text-emerald-400">AQI: <span th:text="${env.aqi}">0</span></p>
+                </div>
+            </div>
+
+            <div class="bg-red-900/20 border border-red-500/40 p-5 rounded-2xl">
+                <h3 class="text-xl font-bold text-red-500 mb-4 flex items-center gap-2">🚨 EMERGENCY ALERTS</h3>
+                <div id="emergencyAlertList" class="space-y-3">
+                    <p class="text-gray-500 text-xs text-center italic">No active emergencies</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 1. Chart Logic
+    const ctx = document.getElementById('trafficChart').getContext('2d');
+    const trafficChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [[${chartLabels}]],
+            datasets: [{
+                label: 'Vehicle Count',
+                data: [[${chartValues}]],
+                backgroundColor: '#38bdf8'
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+    });
+
+    // 2. Fetch AI History
+    async function fetchAILiveData() {
+        const tableBody = document.getElementById('aiTableBody');
+        try {
+            const response = await fetch('http://localhost:8081/api/ai/history');
+            const data = await response.json();
+            tableBody.innerHTML = "";
+            data.slice(-5).reverse().forEach(item => {
+                const alertClass = item.alertLevel === 'HIGH' ? 'ai-high' : (item.alertLevel === 'MEDIUM' ? 'ai-medium' : 'ai-low');
+                tableBody.innerHTML += `
+                    <tr class="border-b border-gray-800/50">
+                        <td class="py-3 font-bold">${item.areaName}</td>
+                        <td class="py-3 ${alertClass} font-black">${item.alertLevel}</td>
+                        <td class="py-3 text-[11px] leading-tight text-gray-300">${item.healthAdvice}</td>
+                    </tr>`;
+            });
+        } catch (e) { console.error("AI Error"); }
+    }
+
+    // 3. NEW: Fetch Emergency Alerts from ALERT-SERVICE (Port 8086 via Gateway 8081)
+    async function fetchEmergencyAlerts() {
+        const alertList = document.getElementById('emergencyAlertList');
+        try {
+            const response = await fetch('http://localhost:8081/api/alerts/active');
+            const data = await response.json();
+
+            if (data.length > 0) {
+                alertList.innerHTML = "";
+                data.slice(-4).reverse().forEach(alert => {
+                    const isHigh = alert.severity === 'HIGH';
+                    alertList.innerHTML += `
+                        <div class="p-3 bg-red-600/10 border-l-4 border-red-600 rounded-lg ${isHigh ? 'emergency-item' : ''}">
+                            <div class="flex justify-between items-start">
+                                <span class="font-bold text-white text-xs">📍 ${alert.areaName}</span>
+                                <span class="bg-red-600 text-white text-[8px] px-1 rounded">${alert.severity}</span>
+                            </div>
+                            <p class="text-[10px] text-red-200 mt-1">${alert.message}</p>
+                        </div>`;
+                });
+            }
+        } catch (e) { console.error("Alerts Error"); }
+    }
+
+    function fetchAllData() {
+        fetchAILiveData();
+        fetchEmergencyAlerts();
+    }
+
+    // Load and set intervals
+    fetchAllData();
+    setInterval(fetchAllData, 5000); // 5 seconds ki auto refresh
+</script>
+</body>
+</html>
+
+

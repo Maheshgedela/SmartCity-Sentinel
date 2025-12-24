@@ -1,0 +1,26 @@
+<div th:fragment="traffic-list" xmlns:th="http://www.thymeleaf.org">
+    <div th:each="traffic : ${trafficList}" class="mb-3 border-bottom pb-3" style="border-color: #2e3a59 !important;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 th:text="${traffic.areaName}" class="mb-0 text-info">Area Name</h5>
+            <span th:class="${traffic.vehicleCount > 100 ? 'status-heavy' : 'status-smooth'}"
+                  th:text="${traffic.vehicleCount > 100 ? 'HEAVY' : 'SMOOTH'}">STATUS</span>
+        </div>
+
+        <div class="mt-2">
+            <p class="mb-1 small">
+                🚗 <strong>Vehicles:</strong> <span th:text="${traffic.vehicleCount}">0</span>
+            </p>
+            <div class="ai-box">
+                <small class="text-warning">🤖 AI Advice:</small>
+                <p class="mb-0 small fst-italic" th:text="${traffic.status}">No advice yet...</p>
+            </div>
+            <p class="update-text mt-2 mb-0 text-end">
+                🕒 <span th:text="${#temporals.format(traffic.reportedAt, 'HH:mm:ss')}">Time</span>
+            </p>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(trafficList)}" class="text-center py-4">
+        <p class="text-muted">No traffic data reported yet.</p>
+    </div>
+</div>

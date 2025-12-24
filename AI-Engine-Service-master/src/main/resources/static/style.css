@@ -1,0 +1,5 @@
+body { font-family: sans-serif; background-color: #f4f4f4; }
+th, td { padding: 12px; text-align: left; }
+.HIGH { color: red; font-weight: bold; }
+.MEDIUM { color: orange; font-weight: bold; }
+.LOW { color: green; font-weight: bold; }
