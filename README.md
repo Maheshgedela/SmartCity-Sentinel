@@ -105,23 +105,6 @@ SmartCity-Sentinel/
 - AI-ready system for future smart city predictions
 - Strong portfolio project for **Java Backend / Microservices roles**
 
----
-
-## 👨‍💻 Developer
-
-**Name:** (Your Name)  
-**Role:** Java Backend Developer  
-**GitHub:** https://github.com/your-username  
-**LinkedIn:** https://linkedin.com/in/your-profile
-
----
-
-## 📌 Future Enhancements
-
-- AI-based traffic & pollution prediction
-- Dashboard UI (React / Angular)
-- Cloud deployment (AWS / Azure)
-- Centralized logging & monitoring
 
 
 
