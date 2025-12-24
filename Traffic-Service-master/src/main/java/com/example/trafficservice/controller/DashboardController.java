@@ -20,26 +20,22 @@ public class DashboardController {
 
         @GetMapping("/dashboard")
         public String getDashboard(Model model) {
-            // 1. Database nundi traffic data teeskuntunnam
             List<TrafficData> allData = repository.findAll();
             if (allData == null) {
                 allData = new ArrayList<>();
             }
             model.addAttribute("allTrafficData", allData);
 
-            // 2. Graph Labels (Null check add chesa, error raakunda)
             List<String> labels = allData.stream()
                     .map(d -> d.getAreaName() != null ? d.getAreaName() : "Unknown")
                     .collect(Collectors.toList());
             model.addAttribute("chartLabels", labels);
 
-            // 3. Graph Values
             List<Integer> values = allData.stream()
                     .map(d -> d.getVehicleCount() != null ? d.getVehicleCount() : 0)
                     .collect(Collectors.toList());
             model.addAttribute("chartValues", values);
 
-            // 4. Environment Dummy Data (Meeru adigina logic)
             List<Map<String, Object>> dummyEnvData = new ArrayList<>();
 
             Map<String, Object> env1 = new HashMap<>();
@@ -56,7 +52,6 @@ public class DashboardController {
 
             model.addAttribute("allEnvData", dummyEnvData);
 
-            // NOTE: File name templates folder lo 'traffic_dashboard.html' ani undali
             return "traffic-dashboard";
         }
     }

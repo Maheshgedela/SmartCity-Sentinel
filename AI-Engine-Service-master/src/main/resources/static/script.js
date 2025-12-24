@@ -17,5 +17,4 @@ function loadData() {
         .catch(err => alert("Gateway is not responding! Check 503 error."));
 }
 
-// Page open avvagane data load avvali ante
 window.onload = loadData;

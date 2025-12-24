@@ -28,7 +28,6 @@ public class TrafficData {
         public Integer getVehicleCount() { return vehicleCount; }
         public void setVehicleCount(Integer vehicleCount) { this.vehicleCount = vehicleCount; }
 
-        // 🔴 IKKADA ADD CHEYANDI (Getter & Setter)
         public String getAiRecommendation() {
             return aiRecommendation;
         }
@@ -36,7 +35,6 @@ public class TrafficData {
         public void setAiRecommendation(String aiRecommendation) {
             this.aiRecommendation = aiRecommendation;
         }
-    // TrafficData.java lo add cheyandi
 
 
     // Getter and Setter

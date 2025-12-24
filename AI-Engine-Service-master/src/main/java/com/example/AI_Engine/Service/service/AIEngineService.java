@@ -32,7 +32,6 @@ public class AIEngineService {
         }
 
         public String analyzeCityData(String area, int count, int aqi) {
-            // 1. Strict Short Prompt: AI confusion thagginchadaniki
             String prompt = String.format(
                     "SYSTEM: ACT AS SMART CITY AI. RETURN ONLY JSON. NO EXPLANATION. NO PYTHON.\n" +
                             "INPUT: Area:%s, Vehicles:%d, AQI:%d\n" +
@@ -51,7 +50,6 @@ public class AIEngineService {
                         .call()
                         .content();
 
-                // 2. Cleaning: Extract only the JSON part from AI response
                 if (aiResult.contains("{") && aiResult.contains("}")) {
                     aiResult = aiResult.substring(aiResult.indexOf("{"), aiResult.lastIndexOf("}") + 1);
                 }
@@ -66,7 +64,6 @@ public class AIEngineService {
             history.setRecordedAqi(aqi);
             history.setTimestamp(LocalDateTime.now());
 
-            // 3. JSON Parsing & Fallback Logic
             try {
                 String cleanedJson = aiResult.replaceAll("```json|```", "").trim();
                 JsonNode jsonNode = objectMapper.readTree(cleanedJson);
@@ -79,7 +76,6 @@ public class AIEngineService {
                 System.err.println("Parsing failed, applying safety rules...");
                 history.setPrediction("Data analyzed by system rules.");
 
-                // Manual Logic if AI fails to give JSON
                 if (aqi > 250 || count > 500) {
                     history.setAlertLevel("HIGH");
                     history.setHealthAdvice("High pollution/traffic! Use bypass roads and wear masks.");
@@ -92,7 +88,6 @@ public class AIEngineService {
                 }
             }
 
-            // 4. Trigger Alert Service if status is HIGH
             if ("HIGH".equalsIgnoreCase(history.getAlertLevel())) {
                 triggerEmergencyAlert(history);
             }

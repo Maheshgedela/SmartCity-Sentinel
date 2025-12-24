@@ -16,7 +16,6 @@ public class EnvironmentalData {
         private Integer aqiValue; // Air Quality Index
         private Double temperature;
         private String co2Level;
-        // High/Medium/Low
         @Column(columnDefinition = "TEXT")
         private String aiImpactAnalysis; // AI suggestion about environment
         private LocalDateTime timestamp;

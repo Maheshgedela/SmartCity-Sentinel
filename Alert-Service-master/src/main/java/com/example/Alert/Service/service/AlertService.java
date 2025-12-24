@@ -14,13 +14,10 @@ public class AlertService {
         private AlertRepository alertRepository;
 
         public String saveAndProcessAlert(Alert alert) {
-            // Timestamp set cheyadam
             alert.setTimestamp(LocalDateTime.now().toString());
 
-            // Database lo save cheyadam
             alertRepository.save(alert);
 
-            // Severity batti message return cheyadam
             if ("HIGH".equalsIgnoreCase(alert.getSeverity())) {
                 System.out.println("🚨 EMERGENCY ACTION INITIATED FOR: " + alert.getAreaName());
                 return "Emergency Alert Processed and Logged to MySQL!";
